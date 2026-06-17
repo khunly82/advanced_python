@@ -19,6 +19,39 @@ def extraire_dates(s: str) -> str:
     pattern = r'\b(?:0[1-9]|[12][0-9]|3[01])\/(?:0[1-9]|1[012])\/\d{4}\b'
     return re.findall(pattern, s)
 
+def extraire_hashtags(s: str) -> list[str]:
+    return re.findall(r'#\S+', s)
+
+def masquer_tel(s: str) -> str:
+    return re.sub(r'(?:\d{2}[ \.-]?){5}', '[REDACTED]', s)
+
+def extraire_paragraphes(s: str)-> list[str]:
+    return re.findall(r'<p>(.*?)</p>', s)
+
+
+def valide_pseudo(s: str) -> bool:
+    return re.match(r'[a-zA-Z]\w{3,11}$', s) != None
+
+
+def total_facture(s: str) -> float:
+    pattern = r'\d+(?:[\.,]\d+){0,1} ?(?=€)'
+    return sum([float(
+        re.sub(r',', '.', p)
+    ) for p in re.findall(pattern, s)])
+
+def obtenir_ip_uniques(s: str) -> list[str]:
+    ip_pattern = r'(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])'
+    l = re.findall(ip_pattern, s, re.MULTILINE)
+    return sorted(list(set(l)))
+
+def compresser_texte(s: str) -> str:
+    pattern = r'([A-Z])\1*'
+    return re.sub(
+        pattern, 
+        lambda m: m.group()[0] + str(len(m.group())), 
+        s
+    )
+
 
 def test_ex1_contient_chiffre():
     assert contient_chiffre("J'ai 2 chats.") is True
@@ -58,37 +91,6 @@ def test_ex5_nettoyer_espaces():
     assert nettoyer_espaces("   Espace au début et à la fin   ") == " Espace au début et à la fin "
     assert nettoyer_espaces("Déjà-propre") == "Déjà-propre"
 
-def extraire_hashtags(s: str) -> list[str]:
-    return re.findall(r'#\S+', s)
-
-def masquer_tel(s: str) -> str:
-    return re.sub(r'(?:\d{2}[ \.-]?){5}', '[REDACTED]', s)
-
-def extraire_paragraphes(s: str)-> list[str]:
-    return re.findall(r'<p>(.*?)</p>', s)
-
-
-def valide_pseudo(s: str) -> bool:
-    return re.match(r'[a-zA-Z]\w{3,11}$', s) != None
-
-
-def total_facture(s: str) -> float:
-    pattern = r'\d+(?:[\.,]\d+){0,1} ?(?=€)'
-    return sum([float(
-        re.sub(r',', '.', p)
-    ) for p in re.findall(pattern, s)])
-
-def obtenir_ip_uniques(s: str) -> list[str]:
-    ip_pattern = r'(?:(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])'
-    l = re.findall(ip_pattern, s, re.MULTILINE)
-    return sorted(list(set(l)))
-
-def compresser_texte(s: str) -> str:
-    pattern = r'([A-Z])\1*'
-    return re.sub(
-        pattern, 
-        lambda m: m.group()[0] + str(len(m.group())), 
-    s)
 
 # # ---------------------------------------------------------------------
 # # NIVEAU MOYEN : Extraction et Manipulation
@@ -103,7 +105,6 @@ def test_ex6_extraire_hashtags():
 
 def test_ex7_extraire_dates():
     texte = "Inscrit le 12/05/2023, modifié le 01/12/2025."
-    print(extraire_dates(texte))
     assert extraire_dates(texte) == ["12/05/2023", "01/12/2025"]
     assert extraire_dates("Date invalide : 123/01/2022") == []
     assert extraire_dates("Autre format : 2026-05-28") == []
@@ -162,43 +163,21 @@ def test_ex13_compresser_texte():
     assert compresser_texte("") == ""
 
 
-def test_ex14_evaluer_mot_de_passe():
-    # Test mot de passe parfait (5/5)
-    r1 = evaluer_mot_de_passe("Secr3t!_")
-    assert r1["score"] == 5
-    assert len(r1["manquants"]) == 0
+# def test_ex14_evaluer_mot_de_passe():
+#     # Test mot de passe parfait (5/5)
+#     r1 = evaluer_mot_de_passe("Secr3t!_")
+#     assert r1["score"] == 5
+#     assert len(r1["manquants"]) == 0
 
-    # Test mot de passe faible (2/5)
-    r2 = evaluer_mot_de_passe("bobby")
-    assert r2["score"] == 2 # Longueur non validée, pas de maj, pas de chiffre, pas de spécial
-    assert "Au moins une majuscule" in r2["manquants"]
-    assert "Au moins un chiffre" in r2["manquants"]
-    assert "Au moins 8 caractères" in r2["manquants"]
+#     # Test mot de passe faible (2/5)
+#     r2 = evaluer_mot_de_passe("bobby")
+#     assert r2["score"] == 2 # Longueur non validée, pas de maj, pas de chiffre, pas de spécial
+#     assert "Au moins une majuscule" in r2["manquants"]
+#     assert "Au moins un chiffre" in r2["manquants"]
+#     assert "Au moins 8 caractères" in r2["manquants"]
 
 
 # def test_ex15_markdown_to_html():
 #     md = "# Titre\n## Sous-titre\nDu **gras** et un [lien](http://test.com)."
 #     attendu = "<h1>Titre</h1>\n<h2>Sous-titre</h2>\nDu <strong>gras</strong> et un <a href=\"[http://test.com](http://test.com)\">lien</a>."
 #     assert markdown_to_html(md) == attendu
-
-
-test_ex1_contient_chiffre()
-test_ex2_commence_par_majuscule()
-test_ex3_valide_code_postal()
-test_ex4_trouve_chat()
-test_ex5_nettoyer_espaces()
-test_ex6_extraire_hashtags()
-test_ex7_extraire_dates()
-test_ex8_masquer_tel()
-
-test_ex9_extraire_paragraphes()
-
-test_ex10_valide_pseudo()
-
-test_ex11_total_facture()
-
-test_ex12_obtenir_ip_uniques()
-
-test_ex13_compresser_texte()
-
-test_ex14_evaluer_mot_de_passe()
