@@ -1,0 +1,7 @@
+{
+    "$schema": "./person.schema.json",
+    "name" : "Khun",
+    "age": 44,
+    "gender": "FEMALE",
+    "birth_date" : "1982-05-06"
+}

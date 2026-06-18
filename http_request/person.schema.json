@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "required": ["name", "birth_date", "gender"],
+    "properties": {
+        "name": { "type": "string", "maxLength": 50 },
+        "age": { "type":"integer", "minimum": 0 },
+        "birth_date": { "type": "string", "format": "date" },
+        "gender": { "enum": ["MALE", "FEMALE", "OTHER"] }
+    }
+}
